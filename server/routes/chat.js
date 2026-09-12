@@ -3,12 +3,18 @@ const express = require('express');
 const router = express.Router();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const GENERATION_CONFIG = {
+  temperature: 0.7,
+  maxOutputTokens: 1024,
+  topP: 0.9,
+};
+// Gemini 3 uses thinking tokens that consume the output budget; keep them minimal.
+if (GEMINI_MODEL.startsWith('gemini-3')) GENERATION_CONFIG.thinkingConfig = { thinkingLevel: 'minimal' };
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const MAX_MESSAGE = 2000;
 const MAX_HISTORY = 16;
-const MAX_OUTPUT = 512;
 const TIMEOUT_MS = 20000;
 
 const MOVIES = [
@@ -34,6 +40,7 @@ const OFFERS = [
 const SYSTEM_PROMPT = [
   'You are CineBot, the friendly AI assistant for CineBroke, an Indian movie ticket booking website (a college project demo, no real payments).',
   'Keep replies concise (under 120 words), warm and helpful with light emoji. Use simple formatting. Never mention you are an AI model unless asked; just say you are CineBot.',
+  'Answer the user\'s question directly and specifically. NEVER dump the whole list of movies in one reply — recommend at most 2-3 movies that best fit the request, and say why.',
   '',
   'MOVIES SHOWING (title — genre — rating/10 — starting price):',
   ...MOVIES.map(
@@ -110,11 +117,7 @@ router.post('/', async (req, res) => {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: MAX_OUTPUT,
-          topP: 0.9,
-        },
+        generationConfig: GENERATION_CONFIG,
       }),
     });
 
