@@ -12,6 +12,7 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/cinebroke'
 
 const authRoutes = require('./routes/auth');
 const bookingRoutes = require('./routes/bookings');
+const chatRoutes = require('./routes/chat');
 
 const isLocalMongo = /^mongodb:\/\/(127\.0\.0\.1|localhost)/.test(MONGO_URI);
 
@@ -30,6 +31,7 @@ async function main() {
 
   app.use('/api/auth', authRoutes);
   app.use('/api/bookings', bookingRoutes);
+  app.use('/api/chat', chatRoutes);
 
   // Serve the frontend
   const webRoot = path.join(__dirname, '..');

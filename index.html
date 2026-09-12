@@ -2565,21 +2565,59 @@
       chatSugs.innerHTML = arr.map(s => `<button class="chat-sug" onclick="handleSuggestion('${s}')">${s}</button>`).join('');
     }
 
-    function sendChat() {
+    let chatHistory = [];
+
+    async function aiReply(text) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 25000);
+        const data = await api('/api/chat', {
+          method: 'POST',
+          signal: controller.signal,
+          body: JSON.stringify({ message: text, history: chatHistory.slice(-16) })
+        });
+        clearTimeout(timer);
+        if (data && data.reply) {
+          chatHistory.push({ role: 'user', text: text });
+          chatHistory.push({ role: 'model', text: data.reply });
+          if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
+          return data.reply;
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function sendChat() {
       const text = chatInputEl.value.trim();
       if (!text) return;
       chatInputEl.value = '';
       addUserMsg(text);
       chatSugs.innerHTML = '';
       showTyping();
-      setTimeout(() => { hideTyping(); handleUserInput(text); }, 500 + Math.random() * 500);
+      const reply = await aiReply(text);
+      hideTyping();
+      if (reply) {
+        addBotMsg(reply);
+        showSuggestions(['Recommend a movie', 'What\u2019s trending?', 'Best offers', 'How to book?']);
+      } else {
+        handleUserInput(text);
+      }
     }
 
-    function handleSuggestion(text) {
+    async function handleSuggestion(text) {
       addUserMsg(text);
       chatSugs.innerHTML = '';
       showTyping();
-      setTimeout(() => { hideTyping(); handleUserInput(text); }, 400 + Math.random() * 400);
+      const reply = await aiReply(text);
+      hideTyping();
+      if (reply) {
+        addBotMsg(reply);
+        showSuggestions(['Recommend a movie', 'What\u2019s trending?', 'Best offers', 'How to book?']);
+      } else {
+        handleUserInput(text);
+      }
     }
 
     function handleUserInput(text) {
