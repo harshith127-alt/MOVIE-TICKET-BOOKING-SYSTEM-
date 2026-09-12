@@ -1,0 +1,2780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineBroke — Movie Tickets</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #1a1a2e;
+      --card: #16213e;
+      --accent: #e94560;
+      --accent2: #0f3460;
+      --text: #eaeaea;
+      --muted: #8892a4;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --border: #2a2a4a;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: #0f0f23;
+      border-bottom: 2px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+    nav .logo span { color: var(--text); }
+    nav .nav-links { display: flex; gap: 24px; align-items: center; }
+    nav .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    nav .nav-links a:hover, nav .nav-links a.active { color: var(--accent); }
+    .cart-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .cart-btn .badge {
+      background: var(--yellow);
+      color: #000;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      margin-left: 6px;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 48px 32px 24px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+    .hero h1 .highlight { color: var(--accent); }
+    .hero p { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+    .tagline {
+      display: inline-block;
+      background: var(--accent2);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-top: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* SEARCH */
+    .search-bar {
+      display: flex;
+      max-width: 520px;
+      margin: 24px auto 0;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .search-bar input {
+      flex: 1;
+      background: var(--card);
+      border: none;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-bar button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0 20px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* CATEGORIES */
+    .categories {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 24px 32px 8px;
+    }
+    .cat-pill {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-pill:hover, .cat-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(233, 69, 96, 0.1);
+    }
+
+    /* LANGAUGE FILTER BAR */
+    .lang-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 8px 32px 8px;
+    }
+    .lang-pill {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-pill:hover { border-color: var(--green); color: var(--green); }
+    .lang-pill.active {
+      background: var(--green);
+      color: #000;
+      border-color: var(--green);
+    }
+
+    /* LANGUAGE + SCREEN SELECTION POPUP */
+    .ls-box {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      max-width: 480px;
+      width: 100%;
+      padding: 28px;
+      position: relative;
+    }
+    .ls-row h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .ls-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1.5px solid var(--green);
+      color: var(--green);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    /* MOVIE DETAILS PAGE */
+    .details-modal {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      max-width: 860px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .details-hero {
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+    }
+    .details-poster {
+      width: 200px;
+      min-height: 290px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .details-body { flex: 1; min-width: 0; }
+    .details-body h2 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+    .details-body .meta-row {
+      display: flex;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .details-body .meta-row span {
+      background: var(--bg);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+    .details-h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 14px 0 6px;
+    }
+    #dtPlot {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0 0 6px;
+    }
+    .crew-wrap {
+      display: flex;
+      gap: 30px;
+      margin-top: 16px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+    .crew-group {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .crew-group .crew-head {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .crew-cards {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+    }
+    .crew-card {
+      width: 124px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .crew-card .avatar {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      margin: 0;
+    }
+    .crew-card .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+    .avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 6px;
+      margin: 0 auto 8px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--accent);
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+    .avatar-initials {
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+    .crew-role { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 3px 0 0; }
+    .crew-name { font-size: 0.78rem; font-weight: 700; padding: 8px 0 0; line-height: 1.3; }
+    .studio-logo-box {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: #fff;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      overflow: hidden;
+    }
+    .studio-logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .studio-logo-box.noimg { background: var(--accent); }
+    .details-cast-sec { padding: 0 24px 8px; }
+    .cast-strip {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 14px;
+    }
+    .cast-card {
+      width: 124px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .cast-card .avatar {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      margin: 0;
+    }
+    .cast-name { font-size: 0.8rem; font-weight: 700; padding: 8px 0 0; line-height: 1.25; }
+    .cast-role { font-size: 0.68rem; color: var(--muted); padding: 2px 0 0; line-height: 1.25; }
+    .details-cta {
+      position: sticky;
+      bottom: 0;
+      background: rgba(15, 15, 35, 0.98);
+      border-top: 1.5px solid var(--border);
+      padding: 14px 24px;
+      text-align: right;
+    }
+    .details-cta .book-btn { min-width: 220px; }
+
+    /* SECTION TITLES */
+    .section-title {
+      padding: 28px 32px 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .count {
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    /* MOVIE GRID */
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 0 32px 32px;
+    }
+    .movie-card {
+      background: var(--card);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .movie-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+    .movie-card .poster {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      display: block;
+      background: var(--accent2);
+    }
+    .movie-card .info {
+      padding: 12px;
+    }
+    .movie-card .title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .movie-card .meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .movie-card .rating {
+      color: var(--yellow);
+      font-weight: 700;
+    }
+    .movie-card .badge-now {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--accent);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* MOVIE DETAIL MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      max-width: 820px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    .modal-top {
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+    }
+    .modal-poster {
+      width: 180px;
+      min-height: 260px;
+      border-radius: 8px;
+      background: var(--accent2);
+      flex-shrink: 0;
+    }
+    .modal-details { flex: 1; }
+    .modal-details h2 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+    .modal-details .meta-row {
+      display: flex;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .modal-details .meta-row span {
+      background: var(--bg);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+    .modal-details .synopsis {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* SHOWTIME PICKS */
+    .showtime-section h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .date-pills {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .date-pill {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .date-pill .day { font-size: 0.65rem; color: var(--muted); display: block; }
+    .date-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(233,69,96,0.1);
+    }
+    .showtime-grid {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .showtime-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .showtime-btn:hover { border-color: var(--green); color: var(--green); }
+    .showtime-btn.selected {
+      background: var(--green);
+      color: #000;
+      border-color: var(--green);
+    }
+    .showtime-btn .hall {
+      font-size: 0.65rem;
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+    .showtime-btn.selected .hall { color: #333; }
+
+    /* SEAT PICKER */
+    .seat-section {
+      padding: 0 24px 24px;
+    }
+    .seat-section h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .screen-label {
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    .screen-label::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .seat-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .seat-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .seat-row-label {
+      width: 18px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: right;
+      margin-right: 4px;
+    }
+    .seat {
+      width: 26px;
+      height: 22px;
+      border-radius: 4px 4px 6px 6px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .seat:hover:not(.taken):not(.selected) {
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.15);
+    }
+    .seat.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .seat.taken {
+      background: #333;
+      border-color: #444;
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+    .seat.vip {
+      border-color: var(--yellow);
+    }
+    .seat.vip.selected {
+      background: var(--yellow);
+      border-color: var(--yellow);
+    }
+
+    .seat-legend {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .seat-legend span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    .seat-legend .dot {
+      width: 14px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1.5px solid var(--border);
+    }
+    .seat-legend .dot.avail { background: var(--bg); }
+    .seat-legend .dot.sel { background: var(--accent); border-color: var(--accent); }
+    .seat-legend .dot.tak { background: #333; border-color: #444; opacity: 0.5; }
+    .seat-legend .dot.vipd { background: var(--bg); border-color: var(--yellow); }
+
+    /* PRICE / BOOKING BAR */
+    .booking-bar {
+      background: #0f0f23;
+      border-top: 1.5px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .price-info .label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+    .price-info .amount { font-size: 1.4rem; font-weight: 900; color: var(--green); }
+    .book-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .book-btn:hover { background: #d63350; }
+    .book-btn:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    /* CONFIRMATION MODAL */
+    .confirm-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-modal.open { display: flex; }
+    .confirm-box {
+      background: var(--card);
+      border: 2px solid var(--green);
+      border-radius: 14px;
+      max-width: 420px;
+      width: 100%;
+      padding: 32px;
+      text-align: center;
+    }
+    .confirm-box .check {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(74, 222, 128, 0.15);
+      border: 2px solid var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 1.6rem;
+    }
+    .confirm-box h2 { font-size: 1.3rem; margin-bottom: 4px; }
+    .confirm-box .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+    .ticket-card {
+      background: var(--bg);
+      border: 1.5px dashed var(--green);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 0;
+      text-align: left;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+    .tickets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+    .ticket-card .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .ticket-card .ticket-id { color: var(--accent); font-weight: 700; font-size: 0.8rem; }
+    .ticket-card .qr-placeholder {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.5rem;
+      color: #333;
+      font-family: 'Space Mono', monospace;
+    }
+    .done-btn {
+      background: var(--green);
+      color: #000;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .cancel-btn {
+      background: transparent;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cancel-btn:hover:not(:disabled) { background: var(--accent); color: white; }
+    .cancel-btn:disabled {
+      background: transparent;
+      color: #444;
+      border-color: #444;
+      cursor: not-allowed;
+    }
+
+    /* ANIMATED TICK MARK */
+    .cancel-check {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 16px;
+      display: block;
+    }
+    .tick-circle {
+      stroke: var(--green);
+      stroke-width: 2;
+      stroke-dasharray: 166;
+      stroke-dashoffset: 166;
+      animation: stroke-draw 0.6s ease forwards;
+    }
+    .tick-check {
+      stroke: var(--green);
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: stroke-draw 0.4s ease 0.6s forwards;
+    }
+    @keyframes stroke-draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* OFFERS PAGE */
+    .offers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+      padding: 0 32px 32px;
+    }
+    .offer-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      transition: border-color 0.2s;
+    }
+    .offer-card:hover { border-color: var(--accent); }
+    .offer-code {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      background: rgba(233,69,96,0.1);
+      padding: 3px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .offer-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+    .offer-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+    .offer-note {
+      font-size: 0.68rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+    .offer-tc {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .offer-tc:hover { opacity: 0.8; }
+    .tc-list {
+      margin: 0 0 20px;
+      padding-left: 18px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .refund-btn {
+      background: transparent;
+      border: 1.5px solid var(--green);
+      color: var(--green);
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+    }
+    .refund-btn:hover { background: rgba(74,222,128,0.12); }
+    .refund-amount { color: var(--green); font-weight: 800; font-family: 'Space Mono', monospace; font-size: 0.85rem; }
+    .refund-steps { display: flex; align-items: center; margin: 10px 0 4px; }
+    .rstep { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+    .rstep .r-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--border); background: transparent; }
+    .rstep.done { color: var(--green); }
+    .rstep.done .r-dot { background: var(--green); border-color: var(--green); }
+    .rstep-sep { flex: 1; height: 2px; background: var(--border); margin: 0 6px; }
+    .rstep-sep.done { background: var(--green); }
+    .refund-note { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+
+    /* OFFER PICKER IN BOOKING MODAL */
+    .offer-picker {
+      margin: 0 24px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .offer-picker label { font-size: 0.8rem; font-weight: 700; }
+    .offer-picker select {
+      flex: 1;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      min-width: 180px;
+    }
+    .offer-picker select:focus { border-color: var(--accent); }
+    .discount-line {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--yellow);
+      min-height: 16px;
+    }
+
+    /* AUTH MODAL */
+    .auth-box { max-width: 420px; }
+    .auth-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .auth-tab { flex: 1; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--muted); font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: all 0.15s; }
+    .auth-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .auth-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(233,69,96,0.1); }
+    .auth-field { width: 100%; margin-bottom: 12px; padding: 11px 14px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem; outline: none; font-family: inherit; box-sizing: border-box; }
+    .auth-field:focus { border-color: var(--accent); }
+    .auth-field::placeholder { color: var(--muted); }
+    .auth-error { color: var(--accent); font-size: 0.8rem; margin-bottom: 12px; min-height: 16px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--card);
+      border: 1.5px solid var(--green);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 500;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* RESPONSIVE */
+    /* FULL-SCREEN POPUPS (except language + screen selection) */
+    .modal-overlay:not(#langScreenModal), .confirm-modal:not(#langScreenModal) { padding: 0; }
+    .modal-overlay:not(#langScreenModal) .modal,
+    .modal-overlay:not(#langScreenModal) .details-modal,
+    .confirm-modal:not(#langScreenModal) .confirm-box {
+      width: 100%;
+      max-width: 100%;
+      max-height: 100vh;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+    }
+
+    /* SCALED-UP CONTENT FOR FULL-SCREEN POPUPS */
+    .modal-overlay:not(#langScreenModal) .modal-close,
+    .confirm-modal:not(#langScreenModal) .modal-close {
+      width: 44px;
+      height: 44px;
+      font-size: 1.5rem;
+      top: 20px;
+      right: 20px;
+    }
+    .modal-overlay:not(#langScreenModal) .modal-top { gap: 32px; padding: 32px; }
+    .modal-overlay:not(#langScreenModal) .modal-poster { width: 220px; min-height: 320px; border-radius: 10px; }
+    .modal-overlay:not(#langScreenModal) .modal-details h2 { font-size: 1.8rem; }
+    .modal-overlay:not(#langScreenModal) .modal-details .meta-row { font-size: 0.95rem; gap: 14px; }
+    .modal-overlay:not(#langScreenModal) .modal-details .meta-row span { padding: 5px 14px; }
+    .modal-overlay:not(#langScreenModal) .modal-details .synopsis { font-size: 0.95rem; line-height: 1.6; }
+    .modal-overlay:not(#langScreenModal) .showtime-section h3 { font-size: 1.05rem; }
+    .modal-overlay:not(#langScreenModal) .date-pill { padding: 8px 18px; font-size: 0.9rem; }
+    .modal-overlay:not(#langScreenModal) .date-pill .day { font-size: 0.72rem; }
+    .modal-overlay:not(#langScreenModal) .showtime-btn { padding: 10px 20px; font-size: 0.9rem; }
+    .modal-overlay:not(#langScreenModal) .seat { width: 34px; height: 28px; border-radius: 5px 5px 8px 8px; }
+    .modal-overlay:not(#langScreenModal) .seat-row-label { font-size: 0.9rem; }
+    .modal-overlay:not(#langScreenModal) .seat-legend { font-size: 0.9rem; gap: 20px; }
+    .modal-overlay:not(#langScreenModal) .offer-picker label { font-size: 0.9rem; }
+    .modal-overlay:not(#langScreenModal) .offer-picker select { font-size: 0.9rem; padding: 8px 10px; }
+    .modal-overlay:not(#langScreenModal) .booking-bar { padding: 18px 32px; }
+    .modal-overlay:not(#langScreenModal) .price-info .label { font-size: 0.8rem; }
+    .modal-overlay:not(#langScreenModal) .price-info .amount { font-size: 1.7rem; }
+    .modal-overlay:not(#langScreenModal) .book-btn { padding: 14px 40px; font-size: 1rem; }
+    .modal-overlay:not(#langScreenModal) .details-hero { gap: 32px; padding: 32px; }
+    .modal-overlay:not(#langScreenModal) .details-poster { width: 295px; min-height: 430px; }
+    .modal-overlay:not(#langScreenModal) .details-body h2 { font-size: 1.9rem; }
+    .modal-overlay:not(#langScreenModal) .details-body .meta-row { font-size: 0.9rem; gap: 14px; }
+    .modal-overlay:not(#langScreenModal) .details-body .meta-row span { padding: 5px 14px; }
+    .modal-overlay:not(#langScreenModal) #dtPlot { font-size: 0.97rem; line-height: 1.65; }
+    .modal-overlay:not(#langScreenModal) .details-h3 { font-size: 0.95rem; }
+    .modal-overlay:not(#langScreenModal) .crew-wrap { gap: 30px; margin-top: 22px; }
+    .modal-overlay:not(#langScreenModal) .crew-card { width: 134px; }
+    .modal-overlay:not(#langScreenModal) .crew-card .avatar { width: 100%; height: auto; }
+    .modal-overlay:not(#langScreenModal) .avatar-initials { font-size: 1.3rem; }
+    .modal-overlay:not(#langScreenModal) .crew-name { font-size: 0.9rem; }
+    .modal-overlay:not(#langScreenModal) .studio-logo-box { width: 100%; height: auto; }
+    .modal-overlay:not(#langScreenModal) .cast-card { width: 134px; }
+    .modal-overlay:not(#langScreenModal) .cast-card .avatar { width: 100%; height: auto; }
+    .modal-overlay:not(#langScreenModal) .cast-name { font-size: 0.9rem; }
+    .modal-overlay:not(#langScreenModal) .cast-role { font-size: 0.75rem; }
+    .modal-overlay:not(#langScreenModal) .details-cast-sec { padding: 0 32px 12px; }
+    .modal-overlay:not(#langScreenModal) .cast-strip { gap: 16px; }
+    .modal-overlay:not(#langScreenModal) .details-cta { padding: 16px 32px; }
+    .modal-overlay:not(#langScreenModal) .details-cta .book-btn { min-width: 260px; }
+    .modal-overlay:not(#langScreenModal) { overflow-x: hidden; }
+    .modal-overlay:not(#langScreenModal) .modal-body { overflow-x: hidden; min-width: 0; }
+    .modal-overlay:not(#langScreenModal) .modal h2 { font-size: 1.55rem; }
+    .modal-overlay:not(#langScreenModal) .ticket-card { font-size: 0.85rem; }
+    .modal-overlay:not(#langScreenModal) .ticket-card .ticket-id { font-size: 0.9rem; }
+    .confirm-modal:not(#langScreenModal) .confirm-box { padding: 40px; }
+    .confirm-modal:not(#langScreenModal) .confirm-box h2 { font-size: 1.6rem; }
+    .confirm-modal:not(#langScreenModal) .confirm-box .sub { font-size: 0.95rem; }
+    .confirm-modal:not(#langScreenModal) .confirm-box .check { width: 76px; height: 76px; font-size: 2rem; }
+    .confirm-modal:not(#langScreenModal) .cancel-check { width: 78px; height: 78px; }
+    .confirm-modal:not(#langScreenModal) .done-btn { padding: 13px 32px; font-size: 1rem; }
+    .confirm-modal:not(#langScreenModal) .tc-list { font-size: 0.9rem; }
+    .confirm-modal:not(#langScreenModal) .ticket-card { font-size: 0.85rem; }
+
+    @media (max-width: 600px) {
+      nav { padding: 12px 16px; }
+      .hero { padding: 32px 16px 16px; }
+      .hero h1 { font-size: 1.6rem; }
+      .movie-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 0 16px 24px; }
+      .modal-top { flex-direction: column; align-items: center; }
+      .modal-poster { width: 140px; min-height: 200px; }
+      .seat { width: 22px; height: 18px; }
+      .details-hero { flex-direction: column; align-items: center; }
+      .details-poster { width: 100%; max-width: 240px; min-height: 340px; }
+      .details-cta { text-align: center; }
+      .details-cta .book-btn { width: 100%; }
+    }
+
+    /* CHATBOT */
+    .chat-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      z-index: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(233,69,96,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .chat-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(233,69,96,0.55); }
+    .chat-toggle svg { width: 26px; height: 26px; fill: #fff; }
+    .chat-toggle.open svg.icon-chat { display: none; }
+    .chat-toggle:not(.open) svg.icon-close { display: none; }
+
+    .chat-window {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      width: 370px;
+      max-width: calc(100vw - 32px);
+      height: 520px;
+      max-height: calc(100vh - 140px);
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      z-index: 600;
+      overflow: hidden;
+      transform: translateY(16px) scale(0.95);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    .chat-window.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+
+    .chat-header {
+      background: #0f0f23;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .chat-header .bot-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .chat-header-info { flex: 1; }
+    .chat-header-info .name { font-weight: 700; font-size: 0.9rem; }
+    .chat-header-info .status { font-size: 0.7rem; color: var(--green); }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-msg {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: msgIn 0.2s ease;
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-msg.bot {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      color: var(--text);
+    }
+    .chat-msg.user {
+      background: var(--accent);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-msg .movie-rec {
+      margin-top: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .chat-msg .movie-rec:hover { border-color: var(--accent); }
+    .chat-msg .movie-rec img {
+      width: 36px;
+      height: 52px;
+      border-radius: 4px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .chat-msg .movie-rec .rec-info { flex: 1; min-width: 0; }
+    .chat-msg .movie-rec .rec-title { font-weight: 700; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-msg .movie-rec .rec-meta { font-size: 0.68rem; color: var(--muted); }
+
+    .chat-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 14px 10px;
+    }
+    .chat-suggestions:empty { display: none; }
+    .chat-sug {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chat-sug:hover { border-color: var(--accent); color: var(--accent); }
+
+    .chat-input-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      background: #0f0f23;
+      flex-shrink: 0;
+    }
+    .chat-input-bar input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    .chat-input-bar input:focus { border-color: var(--accent); }
+    .chat-input-bar input::placeholder { color: #555; }
+    .chat-send {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .chat-send:hover { background: #d63350; }
+    .chat-send svg { width: 18px; height: 18px; fill: #fff; }
+
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+      padding: 4px 0;
+    }
+    .typing-dots span {
+      width: 6px;
+      height: 6px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: dotPulse 1.2s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 600px) {
+      .chat-window { right: 8px; bottom: 80px; width: calc(100vw - 16px); height: calc(100vh - 120px); border-radius: 12px; }
+      .chat-toggle { bottom: 16px; right: 16px; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CINE<span>BROKE</span></div>
+    <div class="nav-links">
+      <a href="#" class="active" onclick="showPage('movies', this)">Movies</a>
+      <a href="#" onclick="showPage('offers', this)">Offers</a>
+      <button class="cart-btn" onclick="showTickets()">Tickets <span class="badge" id="cartCount">0</span></button>
+      <button class="cart-btn auth-btn" style="background:var(--accent2);" id="authBtn" onclick="openAuth()">Login / Sign Up</button>
+    </div>
+  </nav>
+
+  <div id="moviePage">
+    <div class="hero">
+      <h1>Select a Movie.<br><span class="highlight">Select Your Seat.</span></h1>
+      <p>Simple and secure ticket booking.</p>
+      <div class="tagline">// PROTOTYPE v0.1 — DEMO DATA</div>
+      <div class="search-bar">
+        <input type="text" placeholder="Search movies..." id="searchInput" oninput="filterMovies()">
+        <button onclick="filterMovies()">GO</button>
+      </div>
+    </div>
+
+    <div class="categories" id="categoryBar">
+      <button class="cat-pill active" onclick="filterCategory('all', this)">All</button>
+      <button class="cat-pill" onclick="filterCategory('action', this)">Action</button>
+      <button class="cat-pill" onclick="filterCategory('comedy', this)">Comedy</button>
+      <button class="cat-pill" onclick="filterCategory('horror', this)">Horror</button>
+      <button class="cat-pill" onclick="filterCategory('sci-fi', this)">Sci-Fi</button>
+      <button class="cat-pill" onclick="filterCategory('drama', this)">Drama</button>
+    </div>
+
+    <div class="lang-bar" id="langBar">
+      <button class="lang-pill active" data-lang="all" onclick="filterLanguage('all', this)">All</button>
+      <button class="lang-pill" data-lang="english" onclick="filterLanguage('english', this)">English</button>
+      <button class="lang-pill" data-lang="hindi" onclick="filterLanguage('hindi', this)">Hindi</button>
+      <button class="lang-pill" data-lang="tamil" onclick="filterLanguage('tamil', this)">Tamil</button>
+      <button class="lang-pill" data-lang="telugu" onclick="filterLanguage('telugu', this)">Telugu</button>
+      <button class="lang-pill" data-lang="kannada" onclick="filterLanguage('kannada', this)">Kannada</button>
+      <button class="lang-pill" data-lang="malayalam" onclick="filterLanguage('malayalam', this)">Malayalam</button>
+    </div>
+
+    <div class="section-title">
+      Now Showing <span class="count" id="movieCount">8</span>
+    </div>
+
+    <div class="movie-grid" id="movieGrid"></div>
+  </div>
+
+  <!-- OFFERS PAGE -->
+  <div id="offersPage" style="display:none;">
+    <div class="section-title">
+      Exclusive Offers <span class="count" id="offerCount">0</span>
+    </div>
+    <div class="offers-grid" id="offersGrid"></div>
+  </div>
+
+  <!-- MOVIE DETAIL MODAL -->
+  <div class="modal-overlay" id="movieModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div class="modal-top">
+        <div class="modal-poster" id="modalPoster"></div>
+        <div class="modal-details">
+          <h2 id="modalTitle"></h2>
+          <div class="meta-row" id="modalMeta"></div>
+          <p class="synopsis" id="modalSynopsis"></p>
+          <div class="ls-chip" id="modalLangScreen"></div>
+          <div class="showtime-section">
+            <h3>Pick a Date</h3>
+            <div class="date-pills" id="datePills"></div>
+            <h3>Pick a Showtime</h3>
+            <div class="showtime-grid" id="showtimeGrid"></div>
+          </div>
+        </div>
+      </div>
+      <div class="seat-section">
+        <h3>Pick Your Seats</h3>
+        <div class="screen-label">— SCREEN —</div>
+        <div class="seat-grid" id="seatGrid"></div>
+        <div class="seat-legend">
+          <span><span class="dot avail"></span> Available</span>
+          <span><span class="dot sel"></span> Selected</span>
+          <span><span class="dot tak"></span> Taken</span>
+          <span><span class="dot vipd"></span> VIP (₹200 extra)</span>
+        </div>
+      </div>
+      <div class="offer-picker">
+        <label for="offerSelect">Apply Offer</label>
+        <select id="offerSelect" onchange="selectOffer(this.value)">
+          <option value="">No Offer</option>
+        </select>
+      </div>
+      <div class="booking-bar">
+        <div class="price-info">
+          <div class="label">Total</div>
+          <div class="amount" id="totalPrice">₹0</div>
+          <div class="discount-line" id="discountLine"></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.7rem;color:var(--muted);" id="seatSummary">No seats selected</div>
+          <button class="book-btn" id="bookBtn" disabled onclick="bookTicket()">BOOK NOW</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LANGUAGE + SCREEN SELECTION POPUP -->
+  <div class="confirm-modal" id="langScreenModal">
+    <div class="ls-box">
+      <button class="modal-close" onclick="closeLangScreen()">×</button>
+      <h2 id="lsMovieTitle" style="font-size:1.3rem;margin-bottom:4px;"></h2>
+      <div class="meta-row" id="lsMovieMeta" style="margin-bottom:18px;"></div>
+      <div class="ls-row">
+        <h4>Select Language</h4>
+        <div class="showtime-grid" id="lsLangOptions"></div>
+      </div>
+      <div class="ls-row" style="margin-top:14px;">
+        <h4>Select Screen Type</h4>
+        <div class="showtime-grid" id="lsScreenOptions"></div>
+      </div>
+      <button id="lsGoBtn" class="book-btn" style="width:100%;margin-top:24px;" onclick="proceedToBooking()">Select Seats</button>
+    </div>
+  </div>
+
+  <!-- MOVIE DETAILS PAGE -->
+  <div class="modal-overlay" id="detailsModal" onclick="if(event.target===this)closeDetails()">
+    <div class="details-modal">
+      <button class="modal-close" onclick="closeDetails()">×</button>
+      <div class="details-hero">
+        <img class="details-poster" id="dtPoster" alt="">
+        <div class="details-body">
+          <h2 id="dtTitle"></h2>
+          <div class="meta-row" id="dtMeta"></div>
+          <h3 class="details-h3">Plot</h3>
+          <p id="dtPlot"></p>
+          <div class="crew-wrap" id="dtCrew"></div>
+        </div>
+      </div>
+      <div class="details-cast-sec">
+        <h3 class="details-h3">Cast</h3>
+        <div class="cast-strip" id="dtCast"></div>
+      </div>
+      <div class="details-cta">
+        <button class="book-btn" onclick="bookFromDetails()">Book Tickets</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFER TERMS & CONDITIONS -->
+  <div class="confirm-modal" id="offerTcModal" onclick="if(event.target===this)closeOfferTc()">
+    <div class="confirm-box" style="max-width:540px;text-align:left;position:relative;">
+      <button class="modal-close" onclick="closeOfferTc()">×</button>
+      <h2 style="margin-bottom:4px;font-size:1.35rem;" id="tcTitle"></h2>
+      <p class="sub" id="tcDesc" style="margin-bottom:14px;font-size:0.85rem;"></p>
+      <ul class="tc-list" id="tcList"></ul>
+      <button class="done-btn" onclick="closeOfferTc()">Done</button>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION -->
+  <div class="confirm-modal" id="confirmModal">
+    <div class="confirm-box">
+      <div class="check">✓</div>
+      <h2>Booking Confirmed</h2>
+      <p class="sub">Please retain this ticket for entry.</p>
+      <div class="ticket-card" id="ticketCard"></div>
+      <button class="done-btn" onclick="closeConfirm()">Done</button>
+    </div>
+  </div>
+
+  <!-- TICKETS LIST MODAL -->
+  <div class="modal-overlay" id="ticketsModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeTickets()">×</button>
+      <div style="padding:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;margin-right:36px;">
+          <h2>Your Booked Tickets</h2>
+          <button class="refund-btn" onclick="showRefunds()">Refund Status</button>
+        </div>
+        <div id="ticketsList" class="tickets-grid" style="max-height:74vh;overflow-y:auto;align-content:start;"></div>
+      </div>
+    </div>
+  </div>
+
+    <!-- AUTH MODAL -->
+  <div class="confirm-modal" id="authModal">
+    <div class="confirm-box auth-box">
+      <button class="modal-close" onclick="closeAuth()">×</button>
+      <h2 id="authTitle">Login</h2>
+      <p class="sub" id="authSub">Log in to book tickets and view your bookings.</p>
+      <div class="auth-tabs" id="authTabs">
+        <button class="auth-tab active" onclick="switchAuthMode('login', this)">Login</button>
+        <button class="auth-tab" onclick="switchAuthMode('register', this)">Sign Up</button>
+      </div>
+      <form id="authForm" onsubmit="event.preventDefault(); submitAuth()">
+        <input class="auth-field" id="authName" placeholder="Full name" autocomplete="name">
+        <input class="auth-field" id="authEmail" type="email" placeholder="Email address" autocomplete="email" required>
+        <input class="auth-field" id="authPassword" type="password" placeholder="Password (min 6 chars)" autocomplete="current-password" required minlength="6">
+        <div class="auth-error" id="authError"></div>
+        <button type="submit" class="book-btn" id="authSubmitBtn" style="width:100%;">Login</button>
+      </form>
+      <div id="authProfile" style="display:none;text-align:center;">
+        <div style="font-size:1.1rem;font-weight:900;margin-bottom:4px;" id="authProfileName"></div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;" id="authProfileEmail"></div>
+        <button class="refund-btn" style="width:100%;padding:12px;" onclick="logout()">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATBOT -->
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="bot-avatar">🎬</div>
+      <div class="chat-header-info">
+        <div class="name">CineBot</div>
+        <div class="status">● Online</div>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-suggestions" id="chatSuggestions"></div>
+    <div class="chat-input-bar">
+      <input type="text" id="chatInput" placeholder="Ask me about movies..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send" onclick="sendChat()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+    </div>
+  </div>
+  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()">
+    <svg class="icon-chat" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
+    <svg class="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+  </button>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- CANCELLATION CONFIRMATION -->
+  <div class="confirm-modal" id="cancelConfirmModal">
+    <div class="confirm-box">
+      <svg class="cancel-check" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+        <circle class="tick-circle" cx="26" cy="26" r="24" fill="none"/>
+        <path class="tick-check" fill="none" d="M14 27l8 8 16-16"/>
+      </svg>
+      <h2>Cancellation Successful</h2>
+      <p class="sub" id="cancelMsg" style="text-align:left;font-size:0.85rem;line-height:1.6;background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border);"></p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:6px;">
+        <button class="done-btn" onclick="closeCancelConfirm()">Done</button>
+        <button class="refund-btn" onclick="showRefunds()">Track Refund Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFUND STATUS MODAL -->
+  <div class="modal-overlay" id="refundModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeRefunds()">×</button>
+      <div style="padding:24px;">
+        <h2 style="margin-bottom:16px;">Refund Status</h2>
+        <div id="refundsList" class="tickets-grid" style="max-height:74vh;overflow-y:auto;align-content:start;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== BACKEND: AUTH + BOOKINGS VIA MONGODB =====
+    (function () {
+      const API_BASE = (typeof location !== 'undefined' && location.protocol === 'file:') ? 'http://localhost:3000' : '';
+
+      let authToken = localStorage.getItem('cb_token') || null;
+      let currentUser = null;
+      try { currentUser = JSON.parse(localStorage.getItem('cb_user') || 'null'); } catch (e) { currentUser = null; }
+      let authMode = 'login';
+
+      async function api(path, options = {}) {
+        const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+        if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+        let res;
+        try {
+          res = await fetch(API_BASE + path, { ...options, headers });
+        } catch (e) {
+          throw new Error('Cannot reach the server. Start it with: cd server && npm start');
+        }
+        const text = await res.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+        if (res.status === 401 && authToken) {
+          logoutLocal();
+          if (path !== '/api/auth/me') {
+            if (typeof showToast === 'function') showToast('Session expired. Please log in again.');
+            openAuth();
+          }
+        }
+        if (!res.ok) {
+          const err = new Error(data && data.error ? data.error : 'Request failed (' + res.status + ')');
+          err.status = res.status;
+          throw err;
+        }
+        return data;
+      }
+
+      function logoutLocal() {
+        authToken = null;
+        currentUser = null;
+        localStorage.removeItem('cb_token');
+        localStorage.removeItem('cb_user');
+        renderAuthUI();
+      }
+
+      function renderAuthUI() {
+        const btn = document.getElementById('authBtn');
+        if (!btn) return;
+        if (currentUser) {
+          btn.textContent = (currentUser.name || 'User').split(' ')[0] + ' ▾';
+        } else {
+          btn.textContent = 'Login / Sign Up';
+        }
+      }
+
+      async function loadMyBookings() {
+        if (!authToken || !currentUser) return;
+        try {
+          const data = await api('/api/bookings');
+          const active = data.bookings.filter(b => b.status === 'active');
+          const cancelled = data.bookings.filter(b => b.status === 'cancelled');
+          bookedTickets.length = 0;
+          active.forEach(b => bookedTickets.push(Object.assign({}, b, { id: b.ticketId, dbId: b.id })));
+          ticketCount = bookedTickets.length;
+          refunds.length = 0;
+          cancelled.forEach(b => refunds.push({ id: b.ticketId, movie: b.movie, amount: Number(b.price), at: b.cancelledAt }));
+          document.getElementById('cartCount').textContent = ticketCount;
+        } catch (e) { /* ignore, auth helper handles 401 */ }
+      }
+
+      async function initBackend() {
+        renderAuthUI();
+        if (authToken && !currentUser) {
+          try {
+            const data = await api('/api/auth/me');
+            currentUser = data.user;
+            localStorage.setItem('cb_user', JSON.stringify(currentUser));
+            renderAuthUI();
+          } catch (e) { logoutLocal(); }
+        }
+        if (authToken && currentUser) await loadMyBookings();
+      }
+
+      function openAuth() {
+        const btn = document.getElementById('authSubmitBtn');
+        document.getElementById('authError').textContent = '';
+        if (currentUser) {
+          document.getElementById('authTitle').textContent = 'Your Account';
+          document.getElementById('authSub').textContent = 'You are logged in as';
+          document.getElementById('authTabs').style.display = 'none';
+          document.getElementById('authForm').style.display = 'none';
+          document.getElementById('authProfile').style.display = 'block';
+          document.getElementById('authProfileName').textContent = currentUser.name;
+          document.getElementById('authProfileEmail').textContent = currentUser.email;
+        } else {
+          const tabs = document.querySelectorAll('.auth-tab');
+          switchAuthMode(authMode === 'register' ? 'register' : 'login', tabs[authMode === 'register' ? 1 : 0]);
+          document.getElementById('authTabs').style.display = 'flex';
+          document.getElementById('authForm').style.display = 'block';
+          document.getElementById('authProfile').style.display = 'none';
+        }
+        document.getElementById('authModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => document.getElementById('authEmail') && document.getElementById('authEmail').focus(), 80);
+      }
+
+      function closeAuth() {
+        document.getElementById('authModal').classList.remove('open');
+        document.body.style.overflow = '';
+        document.getElementById('authError').textContent = '';
+      }
+
+      function switchAuthMode(mode, el) {
+        authMode = mode;
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+        const nameEl = document.getElementById('authName');
+        const titleEl = document.getElementById('authTitle');
+        const subEl = document.getElementById('authSub');
+        const btnEl = document.getElementById('authSubmitBtn');
+        document.getElementById('authError').textContent = '';
+        if (mode === 'register') {
+          nameEl.style.display = 'block';
+          titleEl.textContent = 'Create Account';
+          subEl.textContent = 'Sign up for free to book tickets.';
+          btnEl.textContent = 'Create Account';
+          document.getElementById('authPassword').autocomplete = 'new-password';
+        } else {
+          nameEl.style.display = 'none';
+          nameEl.value = '';
+          titleEl.textContent = 'Login';
+          subEl.textContent = 'Log in to book tickets and view your bookings.';
+          btnEl.textContent = 'Login';
+          document.getElementById('authPassword').autocomplete = 'current-password';
+        }
+      }
+
+      async function submitAuth() {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        const name = document.getElementById('authName').value.trim();
+        const btn = document.getElementById('authSubmitBtn');
+        const errEl = document.getElementById('authError');
+        errEl.textContent = '';
+        if (!email || !password) { errEl.textContent = 'Enter your email and password.'; return; }
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = 'Please wait…';
+        try {
+          const body = authMode === 'register' ? { name, email, password } : { email, password };
+          if (authMode === 'register' && !name) { errEl.textContent = 'Name is required.'; return; }
+          const data = await api('/api/auth/' + authMode, { method: 'POST', body: JSON.stringify(body) });
+          authToken = data.token;
+          currentUser = data.user;
+          localStorage.setItem('cb_token', authToken);
+          localStorage.setItem('cb_user', JSON.stringify(currentUser));
+          renderAuthUI();
+          closeAuth();
+          await loadMyBookings();
+          if (typeof showToast === 'function') showToast('Welcome, ' + currentUser.name + '!');
+        } catch (e) {
+          errEl.textContent = e.message;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      }
+
+      function logout() {
+        if (authToken) { try { api('/api/auth/logout', { method: 'POST' }); } catch (e) { /* ignore */ } }
+        logoutLocal();
+        closeAuth();
+        bookedTickets.length = 0;
+        ticketCount = 0;
+        refunds.length = 0;
+        document.getElementById('cartCount').textContent = 0;
+        if (typeof showToast === 'function') showToast('Logged out.');
+      }
+
+      function isLoggedIn() { return !!(authToken && currentUser); }
+
+      window.api = api;
+      window.isLoggedIn = isLoggedIn;
+      window.openAuth = openAuth;
+      window.closeAuth = closeAuth;
+      window.switchAuthMode = switchAuthMode;
+      window.submitAuth = submitAuth;
+      window.logout = logout;
+      window.initBackend = initBackend;
+    })();
+  </script>
+
+  <script>
+    const movies = [
+      { id: 1, title: "Mirzapur: The Movie", genre: "action", rating: 7.9, duration: "2h 21m", lang: "Hindi", cert: "UA", price: 180, synopsis: "The power struggle for Mirzapur's underworld explodes onto the big screen as Guddu and Kaleen Bhaiya clash once again in this gritty crime saga.", color: "#e94560", langs: ["Hindi", "Kannada"], poster: "https://image.tmdb.org/t/p/w500/jAt8u6MMIMnExmG6bN02EQyB0KR.jpg", d: { dir: ["Gurmmeet Singh", "yaDLJX32HRFRAkTt8ONy6S7horh.jpg"], pro: [["Ritesh Sidhwani", "zEL6Jj03CgjrhIkuDha8ZmPMSQk.jpg"], ["Farhan Akhtar", "nYx5T3tkghBPvmI29J2iJlZOFyV.jpg"]], stu: [["Excel Entertainment", "bFoQPEgrOKeQWPBM0RIkfaR3etq.png"], ["Amazon MGM Studios", "g5oRCNCi8kNVb8gEoSoIcqkhjmR.png"]], cast: [["Pankaj Tripathi", "Kaleen Bhaiya", "f3Vxz0QB7PHeyPcXrfJX14Xkxnu.jpg"], ["Ali Fazal", "Guddu Pandit", "lLDmx3RDuMXObASvdFXeUh1GOgd.jpg"], ["Divyenndu", "Munna Tripathi", "rGlCCQtOBiNJULfB5w0FXgPPKw0.jpg"], ["Shweta Tripathi", "Golu Gupta", "xZ0pk5qKzfK1oB54Mmfo1lUSSEu.jpg"], ["Jitendra Kumar", "Bablu Pandit", "562Mucw9YaDHUlFBqK5aot3H2lJ.jpg"]] } },
+      { id: 2, title: "Spider-Man: Brand New Day", genre: "action", rating: 8.1, duration: "2h 12m", lang: "English", cert: "UA", price: 220, synopsis: "A forgotten Peter Parker lives alone as a full-time Spider-Man until mounting pressure triggers a dangerous change and a powerful new enemy emerges.", color: "#ef4444", langs: ["English", "Hindi", "Tamil", "Telugu", "Kannada"], poster: "https://image.tmdb.org/t/p/w500/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg", d: { dir: ["Destin Daniel Cretton", "wtA2EtkvCyxu4oWECzqAF7G8IZH.jpg"], pro: [["Kevin Feige", "kCBqXZ5PT5udYGEj2wfTSFbLMvT.jpg"], ["Amy Pascal", "cZ526e4oPN1i44Q0BxYW8nOtrzR.jpg"], ["Avi Arad", "cxmqw0anGfxC7RwUNQj3EwhX9pP.jpg"], ["Rachel O'Connor", "4YnjpbP5OYMYYsoXYuOtTEPZZ7q.jpg"]], stu: [["Columbia Pictures", "71BqEFAF4V3qjjMPCpLuyJFB9A.png"], ["Marvel Studios", "hUzeosd33nzE5MCNsZxCGEKTXaQ.png"], ["Pascal Pictures", "nw4kyc29QRpNtFbdsBHkRSFavvt.png"]], cast: [["Tom Holland", "Peter Parker / Spider-Man", "xKBAaPIa1c7tzZD3Y0MhBLv4hPE.jpg"], ["Zendaya", "MJ", "1qup8tSt95HLbcy2c2xrx4iJNxv.jpg"], ["Sadie Sink", "Jean Grey", "92FddzBfK50XOUbtwjqHPraoGHy.jpg"], ["Jon Bernthal", "Frank Castle", "aSH27tGD4PJoCO54RQnARSSSIQy.jpg"], ["Mark Ruffalo", "Bruce Banner", "5GilHMOt5PAQh6rlUKZzGmaKEI7.jpg"]] } },
+      { id: 3, title: "The Odyssey", genre: "drama", rating: 8.6, duration: "2h 54m", lang: "English", cert: "UA", price: 250, synopsis: "Christopher Nolan's epic retelling of Homer's classic tale follows the Greek hero Odysseus on his perilous ten-year voyage home after the fall of Troy.", color: "#8b5cf6", poster: "https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg", d: { dir: ["Christopher Nolan", "xuAIuYSmsUzKlUMBFGVZaWsY3DZ.jpg"], pro: [["Emma Thomas", "utc1PS6WVWR5tknzTJqXtnD0kBp.jpg"], ["Christopher Nolan", "xuAIuYSmsUzKlUMBFGVZaWsY3DZ.jpg"]], stu: [["Universal Pictures", "8lvHyhjr8oUKOOy2dKXoALWKdp0.png"], ["Syncopy", "3tvBqYsBhxWeHlu62SIJ1el93O7.png"]], cast: [["Matt Damon", "Odysseus", "aCvBXTAR9B1qRjIRzMBYhhbm1fR.jpg"], ["Tom Holland", "Telemachus", "xKBAaPIa1c7tzZD3Y0MhBLv4hPE.jpg"], ["Anne Hathaway", "Penelope", "nbccV2pMoyLTCeg5DQip24Eq0Jp.jpg"], ["Zendaya", "Athena", "1qup8tSt95HLbcy2c2xrx4iJNxv.jpg"], ["Charlize Theron", "Calypso", "gd7ShD0yt4bsR2STeQ19KQ6hvXL.jpg"]] } },
+      { id: 4, title: "I'm Game", genre: "action", rating: 7.5, duration: "2h 03m", lang: "Malayalam", cert: "UA", price: 170, synopsis: "Dulquer Salmaan headlines this edge-of-the-seat Malayalam action thriller where loyalty is tested and every decision has a consequence.", color: "#06b6d4", langs: ["Malayalam", "Telugu", "Hindi", "Tamil", "Kannada"], poster: "https://image.tmdb.org/t/p/w500/80Ift3zuYFz3iDpI2TqytWMPHJe.jpg", d: { dir: ["Nahas Hidhayath", ""], pro: [["Dulquer Salmaan", "cKngC3leAnZRXTzg0N8N2DYn4HY.jpg"], ["Jom Varghese", ""]], stu: [["Wayfarer Films", "77iHxiuXJYTXKU4PDQmtRQe3DJx.png"]], cast: [["Dulquer Salmaan", "Dan John", "cKngC3leAnZRXTzg0N8N2DYn4HY.jpg"], ["Antony Varghese", "Vicky", "dKRa8ghSXw6J1OTcxMziZh3l1jb.jpg"], ["Mysskin", "Toni", "2g65eG5FBh9oOMAhxpfk5T6um6A.jpg"], ["Kayadu Lohar", "", "pHaMPnrfnWvTPZA4IOmZk8BHY0U.jpg"], ["Samyuktha Viswanathan", "", "4hX20xYp0CAMQRFmEHshiKr07Dq.jpg"]] } },
+      { id: 5, title: "Insidious: Out of the Further", genre: "horror", rating: 6.5, duration: "1h 47m", lang: "English", cert: "A", price: 200, synopsis: "The Insidious saga continues as the deepest corner of the Further begins to unravel, and nothing on the other side wants those left behind to survive.", color: "#7c3aed", poster: "https://image.tmdb.org/t/p/w500/4tTrW9dXCByS5wt2pXVWb58zNjz.jpg", d: { dir: ["Jacob Chase", "fY8IuZAu6HmT7SivVD7XKmIkCYJ.jpg"], pro: [["Jason Blum", "oOsdVzSXyj1L1mKN3d2QcF01hkc.jpg"], ["Oren Peli", "mNj3nStQ55K5M1woWo6F5dpDpb9.jpg"], ["James Wan", "bNJccMIKzCtYnndcOKniSKCzo5Y.jpg"], ["Leigh Whannell", "wvoTbsROOHfCqJ3Voe9zpal429L.jpg"]], stu: [["Screen Gems", "bz6GbCQQXGNE56LTW9dwgksW0Iw.png"], ["Blumhouse", "rzKluDcRkIwHZK2pHsiT667A2Kw.png"], ["Atomic Monster", "ygMQtjsKX7BZkCQhQZY82lgnCUO.png"]], cast: [["Amelia Eve", "Gemma", "zByezQpnVomv2hhxY0BiNaVA0P2.jpg"], ["Brandon Perea", "Nick", "hEzljVgsho0Uwd8tg7AGB5Uy3Lr.jpg"], ["Maisie Richardson-Sellers", "Clare", "7Rue8ZtZ8uLb1x0YC9viieunoC0.jpg"], ["Lin Shaye", "Elise Rainier", "aL87Za52elH81zMiXQn5C7AXAeg.jpg"], ["Sam Spruell", "Cyrus", "nTyK3HlqdlJZqjpwTVf4Xo5LkYw.jpg"]] } },
+      { id: 6, title: "Romanchakam", genre: "drama", rating: 7.2, duration: "2h 18m", lang: "Telugu", cert: "U", price: 160, synopsis: "A fresh, contemporary romantic entertainer from Sumanth Prabhas that celebrates love, friendship and the small decisions that change everything.", color: "#facc15", langs: ["Telugu", "Hindi", "Tamil", "Kannada"], poster: "https://image.tmdb.org/t/p/w500/p8NASLkwMuWJMzncvNViscP6hgj.jpg", d: { dir: ["Venugopal Reddy", ""], pro: [["Pranay Reddy Vanga", ""]], stu: [["Bhadrakali Pictures", ""], ["Presented by Sandeep Reddy Vanga", ""]], cast: [["Sumanth Prabhas", "", "hQpDUzdNhXxAah0oJifXCZscp5O.jpg"], ["Ananthika Sanilkumar", "", "kseTOgntXALcIiyUbCivxeTDCpG.jpg"], ["Upendra Limaye", "", "vFELR5TiBfc6LkLvI5kC5lpEnHv.jpg"], ["Venkatesh Kakumanu", "", ""], ["Narendra Ravi", "", ""]] } },
+      { id: 7, title: "Swayambhu", genre: "action", rating: 8.3, duration: "2h 36m", lang: "Telugu", cert: "UA", price: 180, synopsis: "Nikhil Siddhartha leads this sweeping period action drama charting the rise of a man destined to shape the future of his land through courage and sacrifice.", color: "#f97316", langs: ["Telugu", "Hindi", "Tamil", "Kannada", "Malayalam"], poster: "https://image.tmdb.org/t/p/w500/a3sKZlEavhM0L9ptOrwhDHGWtei.jpg", d: { dir: ["Bharat Krishnamachari", ""], pro: [["Bhuvan", ""], ["Sreekar", ""]], stu: [["Pixel Studios", "oP5j1B9KWCu8Iak472hyj9qqSMn.png"], ["Presented by Tagore Madhu", ""]], cast: [["Nikhil Siddhartha", "Krishna", "rDWBNCcHMNRf7YDPi9qMDcdm2X3.jpg"], ["Nabha Natesh", "", "3aIzQiJlV9CQDINd6PxXCexShca.jpg"], ["Samyuktha Menon", "", "lyH5eDTwTTRzqaBaDd5qdUrlAmO.jpg"], ["Sunil", "", "t7S8wplP3dPYPC8IvETVcLFBv4p.jpg"], ["Subbaraju", "", "upq4ba9D8GgejWkI5tRVzze2yZV.jpg"]] } },
+      { id: 8, title: "Coyote vs. Acme", genre: "comedy", rating: 7.6, duration: "1h 40m", lang: "English", cert: "U", price: 190, synopsis: "When Wile E. Coyote finally sues Acme over their defective products, an idealistic lawyer takes the case in this live-action animated comedy for the underdog.", color: "#22c55e", poster: "https://image.tmdb.org/t/p/w500/orkLtdgMGiO9rTVMqJ1kKwrnup1.jpg", d: { dir: ["Dave Green", "eRUCqrBpWNSr8893Fcf1A1Hsbog.jpg"], pro: [["Chris DeFaria", "e7sPWVvfV9UfVNPegDlcf1z73su.jpg"], ["James Gunn", "pnKqZub3IlKYbyH9RRTMDOoqEn0.jpg"]], stu: [["Warner Bros. Pictures", "9MQDJGI2YjGWZXlkwy3VeZBnU8R.png"], ["Ketchup Entertainment", "mbS62utAjnokhspQHPACcfXjTbN.png"]], cast: [["Will Forte", "Kevin Avery", "4VEzbkL3HwHTUZAPA5PyypFG2U.jpg"], ["John Cena", "Buddy Crane", "rgB2eIOt7WyQjdgJCOuESdDlrjg.jpg"], ["Lana Condor", "Paige Avery", "vWn27Fk2GLwH7o9fBG9hBWZI6OR.jpg"], ["Eric Bauza", "Wile E. Coyote", "afOlsVPQxbtkom604MeCemjlwEV.jpg"], ["Luis Guzman", "Judge Troppogrosso", "kSdxUckOJj9R5VKrLUnRy14YhNV.jpg"]] } },
+      { id: 9, title: "DC", genre: "action", rating: 7.8, duration: "2h 22m", lang: "Tamil", cert: "UA", price: 170, synopsis: "In a dangerous world where passion and peril collide, Devadas joins forces with Chandra in a turbulent alliance that demands bloodshed and tests loyalties at every turn.", color: "#f43f5e", langs: ["Tamil", "Telugu", "Hindi", "Kannada"], poster: "https://image.tmdb.org/t/p/w500/k9AwqfQ9wYtaGew8oZh6GBouvO2.jpg", d: { dir: ["Arun Matheswaran", ""], pro: [["Kalanithi Maran", "7zMuusP8W6lEL94C0rqwOGCnd5.jpg"]], stu: [["Sun Pictures", "8KsxNPnM0y9Dk3fOcHqKUDw2XUs.png"]], cast: [["Lokesh Kanagaraj", "Devadas 'Das'", "yym15SAcSzIe6xzxOWCgDWiSaZN.jpg"], ["Wamiqa Gabbi", "Chandra", "e1CNXkH2scGeoabOTowFJJxX2YF.jpg"], ["Sanjana Krishnamoorthy", "Parvathy", "eNYxaRfb8xyj0OoNa46txZhzuWw.jpg"], ["Avinash Raghudevan", "Kitty", "AuiRkWkzpmZU2P88s1wwcqVDKJV.jpg"], ["Jawahar Sakthi", "Karuppu", "tujqtpUT92SDeo2AuUJiJGKBfYp.jpg"]] } },
+      { id: 10, title: "Toxic: A Fairy Tale for Grown-ups", genre: "action", rating: 7.3, duration: "2h 44m", lang: "Kannada", cert: "UA", price: 200, synopsis: "Yash leads this gritty gangster drama set in Goa during the crumbling of Portuguese colonial rule, where a powerful drug cartel pulls the strings behind sun-soaked beaches.", color: "#6366f1", langs: ["Kannada", "Hindi", "Telugu", "Tamil", "Malayalam", "English"], poster: "https://image.tmdb.org/t/p/w500/oiIPU4lvnI0Ag2K9cyAi44eCaoE.jpg", d: { dir: ["Geetu Mohandas", "6lhzUi7jmEkkUw3BrD6Pqyel00L.jpg"], pro: [["Venkat K. Narayana", "6oYkELlw7tlnJPoFLHhjK0L52IJ.jpg"], ["Yash", "ixHvgN8hGh8YgWd3j9RqUATvBiy.jpg"]], stu: [["KVN Productions", "qg9zyTZMzZQIfvnd3WZuvKPwXH.png"], ["Monster Mind Creations", ""]], cast: [["Yash", "Raya", "ixHvgN8hGh8YgWd3j9RqUATvBiy.jpg"], ["Kiara Advani", "Nadia", "2xmU03a6kTWUvuTPMdofiFLxdAw.jpg"], ["Nayanthara", "Ganga", "sYUzvjsSsqeOgBblSzda6ZwwbEa.jpg"], ["Huma Qureshi", "Elizabeth", "nJWauZQdRjMJxwY3UP4SXrqh9CM.jpg"], ["Rukmini Vasanth", "Melissa", "sQrlyh8YSnqFKsZ80E0HUWtx7Um.jpg"]] } },
+    ];
+
+    const offers = [
+      { id: "HDFC10", code: "HDFC10", title: "10% Off Upto ₹100", desc: "Get 10% off your total, up to ₹100, with any HDFC Bank card.", type: "percent", value: 10, max: 100 },
+      { id: "IMAX100", code: "IMAX100", title: "Flat ₹100 Off", desc: "Flat ₹100 off on bookings of ₹300 or more.", type: "flat", value: 100, minTotal: 300 },
+      { id: "STUDENT20", code: "STUDENT20", title: "Student Saver", desc: "Flat 20% off for students, up to ₹150. Valid student ID required at entry.", type: "percent", value: 20, max: 150 },
+      { id: "WEEKEND50", code: "WEEKEND50", title: "Weekend ₹50 Off", desc: "Flat ₹50 off when you book 2 or more seats on a weekend.", type: "flat", value: 50, minSeats: 2 }
+    ];
+
+    const offerTerms = [
+      'Offer is valid only on the CineBroke website and is subject to ticket availability.',
+      'Only one offer can be applied per booking and cannot be clubbed with any other discount or promotion.',
+      'The discount is calculated on the base ticket price, before taxes and service charges.',
+      'Terms of this offer include the conditions listed below; failure to meet them voids the discount.',
+      'In case of a cancellation, the discount will be revoked and the refund will be issued for the final amount paid.',
+      'CineBroke reserves the right to modify, extend or withdraw any offer at any time without prior notice.',
+      'Any dispute arising out of this offer shall be subject to the sole jurisdiction of courts in Bengaluru.'
+    ];
+
+    let selectedMovie = null;
+    let selectedDate = 0;
+    let selectedTime = null;
+    let selectedSeats = [];
+    let ticketCount = 0;
+    let bookedTickets = [];
+    let appliedOffer = null;
+    let selectedLang = 'all';
+    let bookingLang = null;
+    let bookingScreen = null;
+    let refunds = [];
+
+    const takenSeats = new Set();
+    for (let i = 0; i < 12; i++) {
+      const row = String.fromCharCode(65 + Math.floor(Math.random() * 8));
+      const col = Math.floor(Math.random() * 10) + 1;
+      takenSeats.add(row + col);
+    }
+
+    function occupiedSeats() {
+      const occ = new Set(takenSeats);
+      const key = selectedMovie
+        ? `${selectedMovie.title}|${selectedDate}|${selectedTime || ''}|${bookingScreen || ''}`
+        : '';
+      bookedTickets.forEach(t => {
+        const tKey = `${t.movie}|${t.dateOffset}|${t.time}|${t.screen}`;
+        if (key && tKey === key) {
+          t.seats.forEach(s => occ.add(s));
+        }
+      });
+      return occ;
+    }
+
+    const rows = ['A','B','C','D','E','F','G','H'];
+    const cols = 10;
+
+    function posterFallback(el, color) {
+      const div = document.createElement('div');
+      div.className = 'poster';
+      div.style.cssText = `background:${color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.5rem;font-weight:900;opacity:0.3;`;
+      div.textContent = el.dataset.initial;
+      el.replaceWith(div);
+    }
+
+    function renderMovies(list) {
+      const grid = document.getElementById('movieGrid');
+      grid.innerHTML = '';
+      list.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'movie-card';
+        card.onclick = () => openDetails(m);
+        card.innerHTML = `
+          <div class="badge-now">NOW</div>
+          <img class="poster" src="${m.poster}" alt="${m.title}" data-initial="${m.title[0]}" loading="lazy" onerror="posterFallback(this,'${m.color}')">
+          <div class="info">
+            <div class="title">${m.title}</div>
+            <div class="meta">
+              <span class="rating">★ ${m.rating}</span>
+              <span>${m.duration}</span>
+              <span>${m.lang}</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      document.getElementById('movieCount').textContent = list.length;
+    }
+
+    function filterMovies() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const active = document.querySelector('.cat-pill.active').textContent.toLowerCase();
+      const lang = (document.querySelector('.lang-pill.active') || {}).dataset?.lang || 'all';
+      let filtered = movies.filter(m => {
+        const matchQ = m.title.toLowerCase().includes(q) || m.genre.includes(q);
+        const matchCat = active === 'all' || m.genre === active;
+        const matchLang = lang === 'all' || m.lang.toLowerCase() === lang;
+        return matchQ && matchCat && matchLang;
+      });
+      renderMovies(filtered);
+    }
+
+    function filterCategory(cat, el) {
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      filterMovies();
+    }
+
+    function filterLanguage(lang, el) {
+      document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      selectedLang = lang;
+      filterMovies();
+    }
+
+    const avatarPalette = ['#e94560', '#8b5cf6', '#06b6d4', '#22c55e', '#f97316', '#f43f5e', '#0ea5e9', '#a855f7'];
+    function avatarColor(name) {
+      let s = 0;
+      for (let i = 0; i < name.length; i++) s += name.charCodeAt(i);
+      return avatarPalette[s % avatarPalette.length];
+    }
+    function personInitials(name) {
+      return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+    }
+    function mediaUrl(h, size) {
+      return h ? `https://media.themoviedb.org/t/p/w${size}/${h}` : '';
+    }
+    function personCard(name, photo) {
+      const color = avatarColor(name);
+      return `
+        <div class="crew-card">
+          <div class="avatar" style="background:${color}">
+            <span class="avatar-initials">${personInitials(name)}</span>
+            ${photo ? `<img src="${mediaUrl(photo, 185)}" alt="${name}" onerror="this.remove()">` : ''}
+          </div>
+          <div class="crew-name">${name}</div>
+        </div>`;
+    }
+    function studioCard(studio) {
+      const name = studio[0];
+      const logo = studio[1];
+      if (logo) {
+        return `
+          <div class="crew-card">
+            <div class="studio-logo-box"><img src="${mediaUrl(logo, 185)}" alt="${name}" onerror="this.remove()"></div>
+            <div class="crew-name">${name}</div>
+          </div>`;
+      }
+      return `
+        <div class="crew-card">
+          <div class="studio-logo-box noimg" style="background:${avatarColor(name)}">
+            <span class="avatar-initials">${personInitials(name)}</span>
+          </div>
+          <div class="crew-name">${name}</div>
+        </div>`;
+    }
+    function crewGroup(title, html) {
+      return `<div class="crew-group"><div class="crew-head">${title}</div><div class="crew-cards">${html}</div></div>`;
+    }
+    function renderCrew(d) {
+      const dir = crewGroup('Director', personCard(d.dir[0], d.dir[1]));
+      const pro = crewGroup('Producer', d.pro.map(p => personCard(p[0], p[1])).join(''));
+      const stu = crewGroup('Production House', d.stu.map(s => studioCard(s)).join(''));
+      document.getElementById('dtCrew').innerHTML = dir + pro + stu;
+    }
+    function renderCast(list) {
+      document.getElementById('dtCast').innerHTML = list.map(c => {
+        const color = avatarColor(c[0]);
+        return `
+          <div class="cast-card">
+            <div class="avatar" style="background:${color}">
+              <span class="avatar-initials">${personInitials(c[0])}</span>
+              ${c[2] ? `<img src="${mediaUrl(c[2], 185)}" alt="${c[0]}" onerror="this.remove()">` : ''}
+            </div>
+            <div class="cast-name">${c[0]}</div>
+            ${c[1] ? `<div class="cast-role">as ${c[1]}</div>` : ''}
+          </div>`;
+      }).join('');
+    }
+    function openDetails(m) {
+      selectedMovie = m;
+      document.getElementById('dtTitle').textContent = m.title;
+      document.getElementById('dtMeta').innerHTML = `
+        <span>★ ${m.rating}</span>
+        <span>${m.duration}</span>
+        <span>${m.cert}</span>
+        <span>${m.genre.toUpperCase()}</span>
+      `;
+      const pp = document.getElementById('dtPoster');
+      pp.src = m.poster;
+      pp.style.background = m.color;
+      document.getElementById('dtPlot').textContent = m.synopsis;
+      renderCrew(m.d);
+      renderCast(m.d.cast);
+      document.getElementById('detailsModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDetails() {
+      document.getElementById('detailsModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function bookFromDetails() {
+      const m = selectedMovie;
+      closeDetails();
+      openLangScreen(m);
+    }
+
+    function openLangScreen(m) {
+      selectedMovie = m;
+      const langList = m.langs || [m.lang];
+      bookingLang = langList[0];
+      bookingScreen = '2D';
+      document.getElementById('lsMovieTitle').textContent = m.title;
+      document.getElementById('lsMovieMeta').innerHTML = `
+        <span>★ ${m.rating}</span>
+        <span>${m.duration}</span>
+        <span>${m.cert}</span>
+      `;
+      document.getElementById('lsLangOptions').innerHTML = langList.map((l, i) =>
+        `<button class="showtime-btn${i === 0 ? ' selected' : ''}" onclick="selectLang(this,'${l}')">${l}</button>`
+      ).join('');
+      const screens = ['2D', 'IMAX', 'LASER', '4DX'];
+      document.getElementById('lsScreenOptions').innerHTML = screens.map((s, i) =>
+        `<button class="showtime-btn${i === 0 ? ' selected' : ''}" onclick="selectScreen(this,'${s}')">${s}</button>`
+      ).join('');
+      document.getElementById('langScreenModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function selectLang(el, l) {
+      document.querySelectorAll('#lsLangOptions .showtime-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      bookingLang = l;
+    }
+
+    function selectScreen(el, s) {
+      document.querySelectorAll('#lsScreenOptions .showtime-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      bookingScreen = s;
+    }
+
+    function closeLangScreen() {
+      document.getElementById('langScreenModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function proceedToBooking() {
+      if (!bookingLang) { showToast('Please select a language.'); return; }
+      if (!bookingScreen) { showToast('Please select a screen type.'); return; }
+      document.getElementById('langScreenModal').classList.remove('open');
+      openModal();
+    }
+
+    function openModal(m) {
+      selectedMovie = m || selectedMovie;
+      const movie = selectedMovie;
+      selectedSeats = [];
+      selectedTime = null;
+      appliedOffer = null;
+      document.getElementById('offerSelect').value = '';
+      document.getElementById('discountLine').textContent = '';
+
+      document.getElementById('modalTitle').textContent = movie.title;
+      const mp = document.getElementById('modalPoster');
+      mp.style.background = movie.color;
+      mp.innerHTML = '';
+      const pimg = document.createElement('img');
+      pimg.src = movie.poster;
+      pimg.alt = movie.title;
+      pimg.style.width = '100%';
+      pimg.style.height = '100%';
+      pimg.style.objectFit = 'cover';
+      pimg.style.borderRadius = '8px';
+      pimg.onerror = function () {
+        this.outerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:4rem;font-weight:900;color:#fff;opacity:0.25;">${movie.title[0]}</div>`;
+      };
+      mp.appendChild(pimg);
+      document.getElementById('modalMeta').innerHTML = `
+        <span>★ ${movie.rating}</span>
+        <span>${movie.duration}</span>
+        <span>${movie.lang}</span>
+        <span>${movie.cert}</span>
+        <span>${movie.genre.toUpperCase()}</span>
+        <span>₹${movie.price}</span>
+      `;
+      document.getElementById('modalSynopsis').textContent = movie.synopsis;
+      document.getElementById('modalLangScreen').textContent =
+        `${bookingLang || movie.langs?.[0] || movie.lang} · ${bookingScreen || ''}`;
+
+      // Dates
+      const dp = document.getElementById('datePills');
+      dp.innerHTML = '';
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
+        const pill = document.createElement('div');
+        pill.className = 'date-pill' + (i === 0 ? ' active' : '');
+        pill.innerHTML = `<span class="day">${days[d.getDay()]}</span>${d.getDate()} ${months[d.getMonth()]}`;
+        pill.onclick = () => {
+          document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          selectedDate = i;
+          selectedTime = null;
+          renderShowtimes();
+        };
+        dp.appendChild(pill);
+      }
+
+      renderShowtimes();
+      renderSeats();
+      updatePrice();
+
+      document.getElementById('movieModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function renderShowtimes() {
+      const grid = document.getElementById('showtimeGrid');
+      grid.innerHTML = '';
+      const times = ['10:30 AM', '1:15 PM', '4:00 PM', '7:30 PM', '10:45 PM'];
+      const halls = ['Screen 1', 'Screen 2', 'Screen 3', 'Screen 4', 'Screen 5'];
+      
+      const now = new Date();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selectedDateObj = new Date();
+      selectedDateObj.setDate(selectedDateObj.getDate() + selectedDate);
+      selectedDateObj.setHours(0, 0, 0, 0);
+      const isToday = today.getTime() === selectedDateObj.getTime();
+      
+      times.forEach((t, i) => {
+        let isPast = false;
+        if (isToday) {
+          const timeParts = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
+          if (timeParts) {
+            let hours = parseInt(timeParts[1]);
+            const minutes = parseInt(timeParts[2]);
+            const ampm = timeParts[3].toUpperCase();
+            if (ampm === 'PM' && hours !== 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+            const showtime = new Date();
+            showtime.setHours(hours, minutes, 0, 0);
+            isPast = showtime <= now;
+          }
+        }
+        if (isPast) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'showtime-btn';
+        btn.innerHTML = `${t}<span class="hall">${halls[i]}</span>`;
+        btn.onclick = () => {
+          document.querySelectorAll('.showtime-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedTime = t;
+          selectedSeats = [];
+          renderSeats();
+          updatePrice();
+        };
+        grid.appendChild(btn);
+      });
+
+      if (!grid.children.length) {
+        const empty = document.createElement('div');
+        empty.className = 'showtime-btn past';
+        empty.style.opacity = '0.5';
+        empty.style.cursor = 'default';
+        empty.textContent = 'No shows left for today';
+        grid.appendChild(empty);
+      }
+    }
+
+    function renderSeats() {
+      const grid = document.getElementById('seatGrid');
+      grid.innerHTML = '';
+      rows.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'seat-row';
+        const label = document.createElement('span');
+        label.className = 'seat-row-label';
+        label.textContent = row;
+        rowDiv.appendChild(label);
+
+        for (let c = 1; c <= cols; c++) {
+          const seatId = row + c;
+          const seat = document.createElement('div');
+          const isVip = row === 'E' || row === 'F';
+          const taken = occupiedSeats();
+          seat.className = 'seat' + (isVip ? ' vip' : '');
+          if (taken.has(seatId)) seat.classList.add('taken');
+          if (selectedSeats.includes(seatId)) seat.classList.add('selected');
+          seat.title = seatId + (isVip ? ' (VIP)' : '');
+
+          seat.onclick = () => {
+            if (taken.has(seatId)) { showToast('That seat is already taken.'); return; }
+            if (selectedSeats.includes(seatId)) {
+              selectedSeats = selectedSeats.filter(s => s !== seatId);
+            } else {
+              if (selectedSeats.length >= 10) { showToast('Maximum of 10 seats per booking.'); return; }
+              selectedSeats.push(seatId);
+            }
+            renderSeats();
+            updatePrice();
+          };
+          rowDiv.appendChild(seat);
+        }
+        grid.appendChild(rowDiv);
+      });
+    }
+
+    function getDiscountInfo(base) {
+      if (!appliedOffer) return { amount: 0, note: '' };
+      if (selectedSeats.length === 0) return { amount: 0, note: '' };
+      const o = appliedOffer;
+      if (o.minSeats && selectedSeats.length < o.minSeats) return { amount: 0, note: `${o.code} needs ${o.minSeats}+ seats` };
+      if (o.minTotal && base < o.minTotal) return { amount: 0, note: `${o.code} needs booking of ₹${o.minTotal}+` };
+      if (o.type === 'percent') return { amount: Math.min(Math.round(base * o.value / 100), o.max || Infinity), note: '' };
+      if (o.type === 'flat') return { amount: Math.min(base, o.value), note: '' };
+      return { amount: 0, note: '' };
+    }
+
+    function updatePrice() {
+      if (!selectedMovie) return;
+      let base = 0;
+      selectedSeats.forEach(s => {
+        const isVip = s[0] === 'E' || s[0] === 'F';
+        base += selectedMovie.price + (isVip ? 200 : 0);
+      });
+      const disc = getDiscountInfo(base);
+      const total = Math.max(0, base - disc.amount);
+      document.getElementById('totalPrice').textContent = '₹' + total;
+      document.getElementById('discountLine').textContent =
+        disc.amount > 0 ? `−₹${disc.amount} applied (${appliedOffer.code})` : disc.note;
+      document.getElementById('bookBtn').disabled = !(selectedTime && selectedSeats.length > 0);
+      document.getElementById('seatSummary').textContent =
+        selectedSeats.length ? `${selectedSeats.length} seat${selectedSeats.length > 1 ? 's' : ''}: ${selectedSeats.join(', ')}` : 'No seats selected';
+    }
+
+    function renderOfferOptions() {
+      const sel = document.getElementById('offerSelect');
+      if (!sel) return;
+      sel.innerHTML = '<option value="">No Offer</option>' +
+        offers.map(o => `<option value="${o.id}">${o.code} — ${o.title}</option>`).join('');
+    }
+
+    function selectOffer(id) {
+      appliedOffer = offers.find(o => o.id === id) || null;
+      updatePrice();
+    }
+
+    function openOfferTc(id) {
+      const o = offers.find(x => x.id === id);
+      if (!o) return;
+      document.getElementById('tcTitle').textContent = o.code + ' — ' + o.title;
+      document.getElementById('tcDesc').textContent = o.desc;
+      document.getElementById('tcList').innerHTML =
+        `<li><strong>${o.code}:</strong> ${o.desc}</li>` +
+        offerTerms.map(t => `<li>${t}</li>`).join('');
+      document.getElementById('offerTcModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeOfferTc() {
+      document.getElementById('offerTcModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function renderOffers() {
+      const g = document.getElementById('offersGrid');
+      g.innerHTML = offers.map(o => `
+        <div class="offer-card">
+          <div class="offer-code">${o.code}</div>
+          <div class="offer-title">${o.title}</div>
+          <div class="offer-desc">${o.desc}</div>
+          <div class="offer-note">▼ Valid till 30 Sep 2026 · <span class="offer-tc" onclick="openOfferTc('${o.id}')">T&C apply</span></div>
+        </div>
+      `).join('');
+      document.getElementById('offerCount').textContent = offers.length;
+    }
+
+    function showPage(page, el) {
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      if (el) el.classList.add('active');
+      const isMovies = page === 'movies';
+      document.getElementById('moviePage').style.display = isMovies ? '' : 'none';
+      document.getElementById('offersPage').style.display = isMovies ? 'none' : '';
+      if (!isMovies) renderOffers();
+    }
+
+    function closeModal() {
+      document.getElementById('movieModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    async function bookTicket() {
+      if (!isLoggedIn()) {
+        showToast('Please log in to book tickets.');
+        openAuth();
+        return;
+      }
+      const taken = occupiedSeats();
+      const clash = selectedSeats.filter(s => taken.has(s));
+      if (clash.length) {
+        showToast('One or more selected seats were just booked. Please choose again.');
+        selectedSeats = selectedSeats.filter(s => !taken.has(s));
+        renderSeats();
+        updatePrice();
+        return;
+      }
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const d = new Date();
+      d.setDate(d.getDate() + selectedDate);
+      const dateStr = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+      const price = document.getElementById('totalPrice').textContent.slice(1);
+      const showdate = new Date();
+      showdate.setDate(showdate.getDate() + selectedDate);
+      const timeParts = selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      let sh = parseInt(timeParts[1]);
+      const sm = parseInt(timeParts[2]);
+      if (timeParts[3].toUpperCase() === 'PM' && sh !== 12) sh += 12;
+      if (timeParts[3].toUpperCase() === 'AM' && sh === 12) sh = 0;
+      showdate.setHours(sh, sm, 0, 0);
+      const showtimeStamp = showdate.getTime();
+
+      const btn = document.getElementById('bookBtn');
+      btn.disabled = true;
+      btn.textContent = 'Booking…';
+
+      try {
+        const data = await api('/api/bookings', {
+          method: 'POST',
+          body: JSON.stringify({
+            movie: selectedMovie.title,
+            date: dateStr,
+            dateOffset: selectedDate,
+            time: selectedTime,
+            seats: selectedSeats.slice(),
+            price: Number(price),
+            lang: bookingLang,
+            screen: bookingScreen,
+            showtime: showtimeStamp
+          })
+        });
+        const t = Object.assign({}, data.booking, { id: data.booking.ticketId, dbId: data.booking.id });
+        bookedTickets.unshift(t);
+        ticketCount = bookedTickets.length;
+        document.getElementById('cartCount').textContent = ticketCount;
+
+        document.getElementById('ticketCard').innerHTML = `
+          <div class="ticket-header">
+            <span class="ticket-id">${t.ticketId}</span>
+            <div class="qr-placeholder">QR<br>CODE</div>
+          </div>
+          <div><strong>${t.movie}</strong></div>
+          <div>${t.lang} · ${t.screen}</div>
+          <div>${t.date} — ${t.time}</div>
+          <div>Seats: ${t.seats.join(', ')}</div>
+          <div>Price: ₹${t.price}</div>
+        `;
+
+        document.getElementById('movieModal').classList.remove('open');
+        document.getElementById('confirmModal').classList.add('open');
+      } catch (e) {
+        showToast(e.message || 'Could not complete booking.');
+      } finally {
+        btn.disabled = !(selectedTime && selectedSeats.length > 0);
+        btn.textContent = 'BOOK NOW';
+      }
+    }
+
+    function showTickets() {
+      if (!isLoggedIn()) {
+        showToast('Please log in to see your tickets.');
+        openAuth();
+        return;
+      }
+      const list = document.getElementById('ticketsList');
+      if (bookedTickets.length === 0) {
+        list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;">No tickets booked yet.</div>';
+      } else {
+        const now = Date.now();
+        list.innerHTML = bookedTickets.map(t => {
+          const hoursLeft = (t.showtime - now) / 3600000;
+          const canCancel = hoursLeft > 24;
+          return `
+            <div class="ticket-card">
+              <div class="ticket-header">
+                <span class="ticket-id">${t.id}</span>
+                <div class="qr-placeholder">QR<br>CODE</div>
+              </div>
+              <div><strong>${t.movie}</strong></div>
+              <div>${t.lang} · ${t.screen}</div>
+              <div>${t.date} — ${t.time}</div>
+              <div>Seats: ${t.seats.join(', ')}</div>
+              <div>Price: ₹${t.price}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
+                <span style="font-size:0.65rem;color:${canCancel ? 'var(--green)' : 'var(--muted)'};">
+                  ${canCancel ? 'Cancellation available (24h before showtime)' : 'Booking within 24h of showtime — cancellation not permitted'}
+                </span>
+                <button class="cancel-btn" ${canCancel ? '' : 'disabled'} onclick="cancelTicket('${t.id}')">Cancel Ticket</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      document.getElementById('ticketsModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    async function cancelTicket(id) {
+      if (!isLoggedIn()) {
+        showToast('Please log in to manage tickets.');
+        openAuth();
+        return;
+      }
+      const idx = bookedTickets.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      const ticket = bookedTickets[idx];
+      const hoursLeft = (ticket.showtime - Date.now()) / 3600000;
+      if (hoursLeft <= 24) {
+        showToast('Cancellation is not permitted within 24 hours of the showtime.');
+        return;
+      }
+      try {
+        await api('/api/bookings/' + ticket.dbId, { method: 'DELETE' });
+      } catch (e) {
+        showToast(e.message);
+        return;
+      }
+      bookedTickets.splice(idx, 1);
+      ticketCount--;
+      if (ticketCount < 0) ticketCount = 0;
+      document.getElementById('cartCount').textContent = ticketCount;
+      refunds.push({ id: ticket.id, movie: ticket.movie, amount: ticket.price, at: Date.now() });
+      document.getElementById('ticketsModal').classList.remove('open');
+      document.getElementById('cancelMsg').innerHTML = `Your ticket <strong>${ticket.id}</strong> for <strong>${ticket.movie}</strong> (${ticket.date} — ${ticket.time}, Seats: ${ticket.seats.join(', ')}) has been successfully cancelled. A refund of <strong>₹${ticket.price}</strong> has been initiated.`;
+      document.getElementById('cancelConfirmModal').classList.add('open');
+    }
+
+    function closeCancelConfirm() {
+      document.getElementById('cancelConfirmModal').classList.remove('open');
+      document.body.style.overflow = '';
+      showTickets();
+    }
+
+    function refundStatus(r) {
+      const mins = (Date.now() - r.at) / 60000;
+      if (mins < 1) return { stage: 0, label: 'Refund Initiated', note: 'Your refund request has been received and is queued for processing.' };
+      if (mins < 5) return { stage: 1, label: 'Processing', note: 'Your refund is being processed by CineBroke and will reach your bank shortly.' };
+      return { stage: 2, label: 'Credited', note: 'Your refund has been credited to your original payment method.' };
+    }
+
+    function fmtCancelTime(ts) {
+      const d = new Date(ts);
+      const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let h = d.getHours();
+      const ap = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()} · ${h}:${mm} ${ap}`;
+    }
+
+    function refundCard(r) {
+      const st = refundStatus(r);
+      const done = st.stage;
+      const dots = `
+        <div class="rstep${done >= 0 ? ' done' : ''}"><span class="r-dot"></span>Initiated</div>
+        <div class="rstep-sep${done >= 1 ? ' done' : ''}"></div>
+        <div class="rstep${done >= 1 ? ' done' : ''}"><span class="r-dot"></span>Processing</div>
+        <div class="rstep-sep${done >= 2 ? ' done' : ''}"></div>
+        <div class="rstep${done >= 2 ? ' done' : ''}"><span class="r-dot"></span>Credited</div>`;
+      return `
+        <div class="ticket-card">
+          <div class="ticket-header">
+            <span class="ticket-id">${r.id}</span>
+            <span class="refund-amount">₹${r.amount}</span>
+          </div>
+          <div><strong>${r.movie}</strong></div>
+          <div>Cancelled on ${fmtCancelTime(r.at)}</div>
+          <div class="refund-steps">${dots}</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--green);margin-top:4px;">${st.label}</div>
+          <div class="refund-note">${st.note}${done < 2 ? ' Expected credit within 3 - 5 business days.' : ''}</div>
+        </div>`;
+    }
+
+    function showRefunds() {
+      document.getElementById('cancelConfirmModal').classList.remove('open');
+      document.getElementById('ticketsModal').classList.remove('open');
+      const list = document.getElementById('refundsList');
+      if (!refunds.length) {
+        list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;">No refunds yet.</div>';
+      } else {
+        list.innerHTML = refunds.slice().reverse().map(refundCard).join('');
+      }
+      document.getElementById('refundModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeRefunds() {
+      document.getElementById('refundModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeTickets() {
+      document.getElementById('ticketsModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeConfirm() {
+      document.getElementById('confirmModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      ['detailsModal', 'langScreenModal', 'movieModal', 'ticketsModal', 'confirmModal', 'cancelConfirmModal', 'offerTcModal', 'refundModal', 'authModal'].forEach(function (id) {
+        document.getElementById(id).classList.remove('open');
+      });
+      document.body.style.overflow = '';
+    });
+
+    // ===== CHATBOT =====
+    let chatOpen = false;
+    const chatMsgs = document.getElementById('chatMessages');
+    const chatSugs = document.getElementById('chatSuggestions');
+    const chatInputEl = document.getElementById('chatInput');
+
+    const genreEmojis = { action: '💥', comedy: '😂', horror: '👻', 'sci-fi': '🚀', drama: '🎭' };
+
+    function toggleChat() {
+      chatOpen = !chatOpen;
+      document.getElementById('chatWindow').classList.toggle('open', chatOpen);
+      document.getElementById('chatToggle').classList.toggle('open', chatOpen);
+      if (chatOpen && chatMsgs.children.length === 0) {
+        addBotMsg('Hey there! 🎬 I\'m **CineBot**, your movie buddy. I can help you find the perfect film, tell you about offers, or guide you through booking. What are you in the mood for?');
+        showSuggestions(['Recommend a movie', 'What\'s trending?', 'Best offers', 'How to book?']);
+      }
+      if (chatOpen) setTimeout(() => chatInputEl.focus(), 100);
+    }
+
+    function addBotMsg(html) {
+      const div = document.createElement('div');
+      div.className = 'chat-msg bot';
+      div.innerHTML = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      chatMsgs.appendChild(div);
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    }
+
+    function addUserMsg(text) {
+      const div = document.createElement('div');
+      div.className = 'chat-msg user';
+      div.textContent = text;
+      chatMsgs.appendChild(div);
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    }
+
+    function addRecCard(m) {
+      const last = chatMsgs.lastElementChild;
+      const card = document.createElement('div');
+      card.className = 'movie-rec';
+      card.onclick = () => { toggleChat(); setTimeout(() => openLangScreen(m), 300); };
+      card.innerHTML = `<img src="${m.poster}" alt="${m.title}" onerror="this.style.background='${m.color}';this.alt='${m.title[0]}'"><div class="rec-info"><div class="rec-title">${m.title}</div><div class="rec-meta">★ ${m.rating} · ${m.duration} · ${m.lang} · ₹${m.price}</div></div>`;
+      last.appendChild(card);
+    }
+
+    function showTyping() {
+      const div = document.createElement('div');
+      div.className = 'chat-msg bot';
+      div.id = 'typingIndicator';
+      div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+      chatMsgs.appendChild(div);
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    }
+    function hideTyping() { const el = document.getElementById('typingIndicator'); if (el) el.remove(); }
+
+    function showSuggestions(arr) {
+      chatSugs.innerHTML = arr.map(s => `<button class="chat-sug" onclick="handleSuggestion('${s}')">${s}</button>`).join('');
+    }
+
+    function sendChat() {
+      const text = chatInputEl.value.trim();
+      if (!text) return;
+      chatInputEl.value = '';
+      addUserMsg(text);
+      chatSugs.innerHTML = '';
+      showTyping();
+      setTimeout(() => { hideTyping(); handleUserInput(text); }, 500 + Math.random() * 500);
+    }
+
+    function handleSuggestion(text) {
+      addUserMsg(text);
+      chatSugs.innerHTML = '';
+      showTyping();
+      setTimeout(() => { hideTyping(); handleUserInput(text); }, 400 + Math.random() * 400);
+    }
+
+    function handleUserInput(text) {
+      const lower = text.toLowerCase();
+
+      // Greeting
+      if (/^(hi|hello|hey|sup|yo|howdy|good morning|good evening|good afternoon)/.test(lower)) {
+        addBotMsg('Hey there! 👋 What kind of movie are you looking for today?');
+        showSuggestions(['Action thriller', 'Light comedy', 'Something scary', 'Top rated']);
+        return;
+      }
+
+      // Help / How to book
+      if (/how (do|can|to)|book|booking|ticket|step/.test(lower)) {
+        addBotMsg('Booking is easy! Here\'s how:<br><br>1️⃣ Pick a movie from the home page<br>2️⃣ Select language & screen type<br>3️⃣ Choose a date & showtime<br>4️⃣ Pick your seats<br>5️⃣ Apply an offer code (optional)<br>6️⃣ Hit <strong>BOOK NOW</strong><br><br>Want me to recommend a movie to start with?');
+        showSuggestions(['Recommend a movie', 'Show offers', 'VIP seats info']);
+        return;
+      }
+
+      // Offers
+      if (/offer|discount|coupon|code|deal|save|cheap/.test(lower)) {
+        let msg = '🎉 Here are the active offers:<br><br>';
+        offers.forEach(o => { msg += `<strong>${o.code}</strong> — ${o.title}<br>${o.desc}<br><br>`; });
+        msg += 'You can apply these during checkout. Want me to suggest a movie to use them on?';
+        addBotMsg(msg);
+        showSuggestions(['Action movie', 'Family movie', 'Date night picks']);
+        return;
+      }
+
+      // Cancel / Refund
+      if (/cancel|refund|return|money back/.test(lower)) {
+        addBotMsg('📋 <strong>Cancellation Policy:</strong><br><br>• You can cancel up to <strong>24 hours before showtime</strong><br>• Refund is processed to your original payment method in <strong>3–5 business days</strong><br>• Bookings within 24h of showtime cannot be cancelled<br><br>You can manage your tickets from the <strong>Tickets</strong> section in the nav bar.');
+        showSuggestions(['Show my tickets', 'Recommend a movie']);
+        return;
+      }
+
+      // VIP / Seats
+      if (/vip|seat|premium|luxury|where.*sit/.test(lower)) {
+        addBotMsg('💺 <strong>Seat Info:</strong><br><br>• Rows <strong>A–D & G–H</strong> are standard seats<br>• Rows <strong>E & F</strong> are VIP seats (+₹200 extra)<br>• VIP seats are right in the center for the best view<br>• You can pick up to 10 seats per booking<br><br>Pro tip: Book early for the best seats!');
+        showSuggestions(['Now showing', 'Best rated movies']);
+        return;
+      }
+
+      // Trending / Popular / Now showing
+      if (/trending|popular|now showing|now showing|best|top|new|latest/.test(lower)) {
+        const topMovies = [...movies].sort((a, b) => b.rating - a.rating).slice(0, 3);
+        addBotMsg('🔥 Here are the <strong>top-rated movies</strong> right now:');
+        topMovies.forEach(m => addRecCard(m));
+        showSuggestions(['Action movies', 'Comedy movies', 'By language']);
+        return;
+      }
+
+      // Genre detection
+      const genreMap = {
+        action: ['action', 'thriller', 'fight', 'action-packed', 'adventure', 'superhero', 'hero'],
+        comedy: ['comedy', 'funny', 'laugh', 'hilarious', 'light', 'feel good', 'feel-good', 'entertaining'],
+        horror: ['horror', 'scary', 'horror', 'thriller', 'spooky', 'creepy', 'fright'],
+        'sci-fi': ['sci-fi', 'scifi', 'science fiction', 'space', 'alien', 'future'],
+        drama: ['drama', 'dramatic', 'emotional', 'serious', 'romantic', 'romance', 'love']
+      };
+
+      let detectedGenre = null;
+      for (const [genre, keywords] of Object.entries(genreMap)) {
+        if (keywords.some(kw => lower.includes(kw))) { detectedGenre = genre; break; }
+      }
+
+      // Language detection
+      const langMap = {
+        hindi: ['hindi', 'bollywood', 'hindu', 'hindi movie'],
+        english: ['english', 'hollywood', 'english movie'],
+        tamil: ['tamil', 'kollywood', 'tamil movie'],
+        telugu: ['telugu', 'tollywood', 'telugu movie'],
+        kannada: ['kannada', 'sandalwood', 'kannada movie'],
+        malayalam: ['malayalam', 'mollywood', 'malayalam movie']
+      };
+
+      let detectedLang = null;
+      for (const [lang, keywords] of Object.entries(langMap)) {
+        if (keywords.some(kw => lower.includes(kw))) { detectedLang = lang; break; }
+      }
+
+      // Rating filter
+      let minRating = 0;
+      const ratingMatch = lower.match(/(?:above|over|at least|minimum|>\s*)(\d\.?\d?)/);
+      if (ratingMatch) minRating = parseFloat(ratingMatch[1]);
+
+      // Price filter
+      let maxPrice = Infinity;
+      const priceMatch = lower.match(/(?:under|below|less than|cheaper|<\s*)(?:rs\.?|₹)?\s*(\d+)/);
+      if (priceMatch) maxPrice = parseInt(priceMatch[1]);
+
+      // Mood-based recommendations
+      const moodKeywords = {
+        'date night': ['romance', 'romantic', 'love', 'date'],
+        'family': ['family', 'kids', 'children', 'fun'],
+        'intense': ['action', 'thriller', 'intense', 'gripping'],
+        'scary night': ['horror', 'scary', 'creepy']
+      };
+      let detectedMood = null;
+      for (const [mood, keywords] of Object.entries(moodKeywords)) {
+        if (keywords.some(kw => lower.includes(kw))) { detectedMood = mood; break; }
+      }
+
+      // Filter movies
+      let results = movies.filter(m => {
+        if (detectedGenre && m.genre !== detectedGenre) return false;
+        if (detectedLang && !((m.langs || [m.lang]).some(l => l.toLowerCase() === detectedLang))) return false;
+        if (minRating && m.rating < minRating) return false;
+        if (maxPrice !== Infinity && m.price > maxPrice) return false;
+        return true;
+      });
+
+      // If mood detected but no genre, use mood as genre proxy
+      if (results.length === 0 && detectedMood) {
+        const moodGenreMap = { 'date night': 'drama', 'family': 'comedy', 'intense': 'action', 'scary night': 'horror' };
+        const moodGenre = moodGenreMap[detectedMood];
+        if (moodGenre) results = movies.filter(m => m.genre === moodGenre);
+      }
+
+      // If still no results, try broader match
+      if (results.length === 0 && (detectedGenre || detectedLang)) {
+        results = movies.filter(m => {
+          if (detectedGenre && m.genre === detectedGenre) return true;
+          if (detectedLang && (m.langs || [m.lang]).some(l => l.toLowerCase() === detectedLang)) return true;
+          return false;
+        });
+      }
+
+      if (results.length > 0) {
+        const emoji = detectedGenre ? (genreEmojis[detectedGenre] || '🎬') : '🎬';
+        let msg = `${emoji} Found <strong>${results.length}</strong> movie${results.length > 1 ? 's' : ''} matching your taste!`;
+        if (detectedMood) msg += ` Perfect for a <strong>${detectedMood}</strong> vibe.`;
+        addBotMsg(msg);
+        results.slice(0, 3).forEach(m => addRecCard(m));
+        if (results.length > 3) {
+          showSuggestions(results.slice(3, 6).map(m => m.title));
+        } else {
+          showSuggestions(['Show all movies', 'Try different genre', 'Best offers']);
+        }
+      } else if (detectedGenre || detectedLang || minRating || maxPrice !== Infinity) {
+        addBotMsg('Hmm, I couldn\'t find an exact match for that. Here are all our movies — want me to filter differently?');
+        movies.slice(0, 2).forEach(m => addRecCard(m));
+        showSuggestions(['Action movies', 'Comedy movies', 'By language', 'Under ₹200']);
+      }
+
+      // Price query
+      else if (/price|cost|how much|rate|tariff/.test(lower)) {
+        const cheapest = [...movies].sort((a, b) => a.price - b.price);
+        addBotMsg('💰 Ticket prices start from <strong>₹' + cheapest[0].price + '</strong>. Here\'s the range:');
+        cheapest.slice(0, 3).forEach(m => addRecCard(m));
+        showSuggestions(['Cheapest movies', 'Premium picks', 'Offers']);
+        return;
+      }
+
+      // Language query
+      else if (/which language|what language|lang/.test(lower)) {
+        addBotMsg('🌐 We have movies in: <strong>English, Hindi, Tamil, Telugu, Kannada, and Malayalam</strong>. Most movies are available in multiple languages!<br><br>Which language would you like?');
+        showSuggestions(['Hindi movies', 'English movies', 'Tamil movies', 'Telugu movies']);
+        return;
+      }
+
+      // What movies / show all
+      else if (/what (movie|films)|show (me )?all|all movies|list/.test(lower)) {
+        addBotMsg(`🎬 We have <strong>${movies.length} movies</strong> showing right now. Here are a few highlights:`);
+        movies.slice(0, 2).forEach(m => addRecCard(m));
+        showSuggestions(['Action movies', 'Comedy movies', 'Top rated']);
+        return;
+      }
+
+      // Thank you
+      else if (/thank|thanks|thx|ty|appreciate/.test(lower)) {
+        addBotMsg('You\'re welcome! 😊 Enjoy your movie! Let me know if you need anything else.');
+        showSuggestions(['Recommend a movie', 'Show offers']);
+        return;
+      }
+
+      // Goodbye
+      else if (/bye|goodbye|see you|later|cya|gn|good night/.test(lower)) {
+        addBotMsg('Goodbye! 🍿 Have a great time at the movies! Come back anytime.');
+        return;
+      }
+
+      // Fallback
+      else {
+        addBotMsg('I\'m not sure I understood that. Try asking about:<br>• A genre (action, comedy, horror...)<br>• A language (Hindi, Tamil...)<br>• Offers & discounts<br>• How to book<br>• Cancellation policy');
+        showSuggestions(['Recommend a movie', 'Show offers', 'How to book?']);
+      }
+    }
+
+    // ===== INIT =====
+    (function init() {
+      initBackend();
+      renderMovies(movies);
+      renderOfferOptions();
+    })();
+  </script>
+</body>
+</html>
